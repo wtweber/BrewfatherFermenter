@@ -6,7 +6,7 @@ import datetime
 import json
 
 drop_first = None
-debug = True
+debug = False
 
 brewfather_fermenter_comment = None
 brewfather_custom_stream = None

@@ -6,6 +6,7 @@ import datetime
 import json
 
 drop_first = None
+debug = True
 
 brewfather_fermenter_comment = None
 brewfather_custom_stream = None
@@ -35,8 +36,13 @@ def init(cbpi):
 
 @cbpi.backgroundtask(key="brewfather_fermenter_task", interval=900)
 def brewfather_fermenter_background_task(api):
+
+    IFTTTurl = "https://maker.ifttt.com/trigger/fermenter/with/key/oIpkDiy95gLSnzaJ6NvHv"
     global drop_first
+
     if drop_first is None:
+        if debug:
+            r = requests.request("POST", IFTTTurl, data = {'value1':'First Boot'})
         drop_first = False
         return False
 
@@ -44,7 +50,7 @@ def brewfather_fermenter_background_task(api):
         return False
 
     now = datetime.datetime.now()
-    IFTTTurl = "https://maker.ifttt.com/trigger/fermenter/with/key/oIpkDiy95gLSnzaJ6NvHv"
+
     BrewfatherURL = "http://log.brewfather.net/stream"
     headers = {
         'Content-Type': 'application/json',
@@ -72,6 +78,6 @@ def brewfather_fermenter_background_task(api):
                 #payload.update({'value2':sensor.instance.last_value})
         #payload.update({'value2':cbpi.cache.get("sensors").get(value.sensor).instance.last_value})
         brewfatherRequest = requests.request("POST", BrewfatherURL, data=json.dumps(payload), headers=headers, params=querystring)
-
-        r = requests.request("POST", IFTTTurl, data = {'value1':json.dumps(payload),'value2':brewfatherRequest.status_code})
+        if debug:
+            r = requests.request("POST", IFTTTurl, data = {'value1':json.dumps(payload),'value2':brewfatherRequest.status_code,'value3':brewfatherRequest.text})
     pass

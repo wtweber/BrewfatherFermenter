@@ -5,7 +5,7 @@ import requests
 import datetime
 import json
 
-drop_first = False
+drop_first = None
 
 brewfather_fermenter_comment = None
 brewfather_custom_stream = None

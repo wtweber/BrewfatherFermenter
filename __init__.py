@@ -6,14 +6,21 @@ import datetime
 import json
 
 drop_first = None
-debug = False
+debug = True
 
 brewfather_fermenter_comment = None
 brewfather_custom_stream = None
 
+def log(s, d=False):
+    if debug or d:
+        cbpi.app.logger.info(s)
+        return True
+    else:
+        return False
+
 @cbpi.initalizer()
 def init(cbpi):
-    cbpi.app.logger.info("Brefather Fermenter plugin Initialize")
+    log("Brefather Fermenter plugin Initialize", True)
 
     global brewfather_fermenter_comment
     global brewfather_custom_stream
@@ -41,8 +48,7 @@ def brewfather_fermenter_background_task(api):
     global drop_first
 
     if drop_first is None:
-        if debug:
-            r = requests.request("POST", IFTTTurl, data = {'value1':'First Boot'})
+        log("Initial boot skipping first log to prevent over logging")
         drop_first = False
         return False
 
@@ -67,17 +73,24 @@ def brewfather_fermenter_background_task(api):
         payload.update({'temp_unit':unit})
         payload.update({'comment':comment})
 
+        payload.update({'temp':cbpi.cache.get("sensors").get(fermenter.sensor).instance.last_value})
+
         #payload.update({'value2':fermenter.sensor3})
-        for key2, sensor in cbpi.cache.get("sensors").iteritems():
-            if str(fermenter.sensor) == str(sensor.instance.id):
-                payload.update({'temp':sensor.instance.last_value})
-            elif str(fermenter.sensor2) == str(sensor.instance.id):
-                payload.update({'aux_temp':sensor.instance.last_value})
-            elif str(fermenter.sensor3) == str(sensor.instance.id):
-                payload.update({'ext_temp':sensor.instance.last_value})
+        # for key2, sensor in cbpi.cache.get("sensors").iteritems():
+        #     if str(fermenter.sensor) == str(sensor.instance.id):
+        #         payload.update({'temp':sensor.instance.last_value})
+        #     elif str(fermenter.sensor2) == str(sensor.instance.id):
+        #         payload.update({'aux_temp':sensor.instance.last_value})
+        #     elif str(fermenter.sensor3) == str(sensor.instance.id):
+        #         payload.update({'ext_temp':sensor.instance.last_value})
                 #payload.update({'value2':sensor.instance.last_value})
         #payload.update({'value2':cbpi.cache.get("sensors").get(value.sensor).instance.last_value})
         brewfatherRequest = requests.request("POST", BrewfatherURL, data=json.dumps(payload), headers=headers, params=querystring)
+        if brewfatherRequest:
+            log("Brewfather logging %s. Data sent:%s"%(brewfatherRequest.json()['result'],json.dumps(payload)))
+        else:
+            cbpi.notify("Brefather Error", "Error logging to Brewfather.", type="danger")
+            log("Brewfather logging Error! URL:%s Body:%s"%(brewfatherRequest.request.url, brewfatherRequest.request.body),True)
         if debug:
             r = requests.request("POST", IFTTTurl, data = {'value1':json.dumps(payload),'value2':brewfatherRequest.status_code,'value3':brewfatherRequest.text})
     pass

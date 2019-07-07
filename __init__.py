@@ -73,7 +73,7 @@ def brewfather_fermenter_background_task(api):
         payload.update({'temp_unit':unit})
         payload.update({'comment':comment})
 
-        payload.update({'temp':cbpi.cache.get("sensors").get(fermenter.sensor).instance.last_value})
+        #payload.update({'temp':cbpi.cache.get("sensors").get(fermenter.sensor).instance.last_value})
 
         #payload.update({'value2':fermenter.sensor3})
         # for key2, sensor in cbpi.cache.get("sensors").iteritems():

@@ -76,13 +76,13 @@ def brewfather_fermenter_background_task(api):
         #payload.update({'temp':cbpi.cache.get("sensors").get(fermenter.sensor).instance.last_value})
 
         #payload.update({'value2':fermenter.sensor3})
-        # for key2, sensor in cbpi.cache.get("sensors").iteritems():
-        #     if str(fermenter.sensor) == str(sensor.instance.id):
-        #         payload.update({'temp':sensor.instance.last_value})
-        #     elif str(fermenter.sensor2) == str(sensor.instance.id):
-        #         payload.update({'aux_temp':sensor.instance.last_value})
-        #     elif str(fermenter.sensor3) == str(sensor.instance.id):
-        #         payload.update({'ext_temp':sensor.instance.last_value})
+        for key2, sensor in cbpi.cache.get("sensors").iteritems():
+            if str(fermenter.sensor) == str(sensor.instance.id):
+                payload.update({'temp':sensor.instance.last_value})
+            elif str(fermenter.sensor2) == str(sensor.instance.id):
+                payload.update({'aux_temp':sensor.instance.last_value})
+            elif str(fermenter.sensor3) == str(sensor.instance.id):
+                payload.update({'ext_temp':sensor.instance.last_value})
                 #payload.update({'value2':sensor.instance.last_value})
         #payload.update({'value2':cbpi.cache.get("sensors").get(value.sensor).instance.last_value})
         brewfatherRequest = requests.request("POST", BrewfatherURL, data=json.dumps(payload), headers=headers, params=querystring)
